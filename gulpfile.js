@@ -28,11 +28,17 @@ const compileSCSS = () =>
     .pipe(dest(join(path, `${basePaths.destStyle}`)))
 
 const compileJS = () =>
-  src(sync(join(path, 'js', '**/*.js')))
+  src(sync(join(path, 'js', '**/*.es6.js')))
     .pipe(
       bable({
         presets: ['@babel/env']
       }
+    ))
+    .pipe(rename(({dirname, basename, extname}) => ({
+      dirname,
+      basename: `${basename}`.replace(`es6`, `compiled`),
+      extname,
+      })
     ))
     .pipe(dest(join(path, `${basePaths.destJs}`)))
 
@@ -50,17 +56,17 @@ const minifyCSS = () =>
     .pipe(dest(join(path, 'css')))
 
 const minifyJS = () =>
-  src(sync(join(path, 'js', '**/*.es6.js')))
+  src(sync(join(path, 'js', '**/*.compiled.js')))
   .pipe(uglify())
   .pipe(rename(({dirname, basename, extname}) => ({
     dirname,
-    basename: `${basename}`.replace(`es6`, `compiled.min`),
+    basename: `${basename}`.replace(`compiled`, `compile.min`),
     extname,
     })
   ))
-    .pipe(sourcemaps.init({ loadMaps: true }))
-    .pipe(sourcemaps.write('.'))
-    .pipe(dest(join(path, 'js')))
+  .pipe(sourcemaps.init({ loadMaps: true }))
+  .pipe(sourcemaps.write('.'))
+  .pipe(dest(join(path, 'js')))
 
 const watchJsAndSCSS = (cb) => {
   const jsFiles = sync(join(path, 'js', '**/*.es6.js'))
