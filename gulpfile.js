@@ -24,11 +24,14 @@ const path = join(__dirname, `${basePaths.modules}`)
 
 const compileSCSS = () =>
   src(sync(join(path, 'scss', '**/*.scss')))
+    .pipe(sourcemaps.init({ loadMaps: true }))
     .pipe(sass().on('error', sass.logError))
+    .pipe(sourcemaps.write('.'))
     .pipe(dest(join(path, `${basePaths.destStyle}`)))
 
 const compileJS = () =>
   src(sync(join(path, 'js', '**/*.es6.js')))
+    .pipe(sourcemaps.init({ loadMaps: true }))
     .pipe(
       bable({
         presets: ['@babel/env']
@@ -40,6 +43,7 @@ const compileJS = () =>
       extname,
       })
     ))
+    .pipe(sourcemaps.write('.'))
     .pipe(dest(join(path, `${basePaths.destJs}`)))
 
 const minifyCSS = () =>
@@ -50,9 +54,7 @@ const minifyCSS = () =>
         basename: `${basename}.min`,
         extname,
       })
-    ))
-    .pipe(sourcemaps.init({ loadMaps: true }))
-    .pipe(sourcemaps.write('.'))
+    ))    
     .pipe(dest(join(path, 'css')))
 
 const minifyJS = () =>
@@ -60,12 +62,10 @@ const minifyJS = () =>
   .pipe(uglify())
   .pipe(rename(({dirname, basename, extname}) => ({
     dirname,
-    basename: `${basename}`.replace(`compiled`, `compile.min`),
+    basename: `${basename}`.replace(`compiled`, `compiled.min`),
     extname,
     })
   ))
-  .pipe(sourcemaps.init({ loadMaps: true }))
-  .pipe(sourcemaps.write('.'))
   .pipe(dest(join(path, 'js')))
 
 const watchJsAndSCSS = (cb) => {
